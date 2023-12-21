@@ -1,0 +1,1510 @@
+Sub ボタン3_Click()
+
+Worksheets().Add After:=Worksheets(Worksheets.count)
+Dim sheetname As Variant
+sheetname = Sheets("data").Cells(2, 3)
+    ActiveSheet.Name = sheetname
+
+'----------------------------------------------------------------------グラフ表示時間探索
+Dim starttime As Date
+Dim endtime As Date
+
+starttime = CDate(Sheets("data").Cells(4, 4).value)
+endtime = CDate(Sheets("data").Cells(5, 4).value)
+
+Dim starttimerow As Integer
+Dim endtimerow As Integer
+Dim firsttime As Date
+Dim secondtime As Date
+
+
+starttimerow = 17
+firsttime = CDate(Sheets("data").Cells(starttimerow, 2))
+Do Until firsttime = starttime
+starttimerow = starttimerow + 1
+firsttime = CDate(Sheets("data").Cells(starttimerow, 2))
+Loop
+
+endtimerow = starttimerow
+secondtime = CDate(Sheets("data").Cells(endtimerow, 2))
+Do Until secondtime = endtime
+endtimerow = endtimerow + 1
+secondtime = CDate(Sheets("data").Cells(endtimerow, 2))
+Loop
+
+
+
+'----------------------------------------------------------------------諸データ入力
+
+Sheets(sheetname).Range("A" & 1) = Sheets("data").Range("A" & 11) 'データファイル名
+Sheets(sheetname).Range("B" & 1) = Sheets("data").Range("B" & 11) 'データファイル名代入
+Sheets(sheetname).Range("A" & 2) = Sheets("data").Range("A" & 12) '試験開始日時
+Sheets(sheetname).Range("B" & 2) = Format(Sheets("data").Range("B" & 12), "yyyy/mm/dd hh:mm") '試験開始日時代入
+
+Sheets(sheetname).Range("F" & 1) = "データ整理日時" 'データ整理開始日時
+Sheets(sheetname).Range("H" & 1) = Format(Now, "yyyy/mm/dd hh:mm") 'データ整理開始日時代入
+Sheets(sheetname).Range("F" & 2) = "切取り時間" '切取り時間
+Sheets(sheetname).Range("H" & 2) = Format(CDate(endtime - starttime), "hh:mm:ss") 'データ整理開始日時
+
+Sheets(sheetname).Range("J" & 1) = "starttime"
+Sheets(sheetname).Range("K" & 1) = Format(CDate(starttime), "hh:mm:ss")
+Sheets(sheetname).Range("J" & 2) = "endtime"
+Sheets(sheetname).Range("K" & 2) = Format(CDate(endtime), "hh:mm:ss")
+
+Sheets(sheetname).Range("A" & 3) = "積算値"
+Range("A3").Font.Bold = True
+Sheets(sheetname).Range("B" & 3) = "室内機１全能力"
+Sheets(sheetname).Range("C" & 3) = "室内機１顕熱能力"
+Sheets(sheetname).Range("D" & 3) = "室内機１潜熱能力"
+Sheets(sheetname).Range("E" & 3) = "室内機１顕熱比"
+Sheets(sheetname).Range("F" & 3) = "室内機１平均能力"
+Sheets(sheetname).Range("G" & 3) = "室内機１部分負荷率"
+Sheets(sheetname).Range("H" & 3) = "室内機１室内平均温度"
+
+Sheets(sheetname).Range("I" & 3) = "室内機２全能力"
+Sheets(sheetname).Range("J" & 3) = "室内機２顕熱能力"
+Sheets(sheetname).Range("K" & 3) = "室内機２潜熱能力"
+Sheets(sheetname).Range("L" & 3) = "室内機２顕熱比"
+Sheets(sheetname).Range("M" & 3) = "室内機２平均能力"
+Sheets(sheetname).Range("N" & 3) = "室内機２部分負荷率"
+Sheets(sheetname).Range("O" & 3) = "室内機２室内平均温度"
+
+Sheets(sheetname).Range("P" & 3) = "供試機消費電力"
+Sheets(sheetname).Range("Q" & 3) = "COP"
+
+Sheets(sheetname).Range("U" & 3) = "直後積算値"
+Range("U3").Font.Bold = True
+Sheets(sheetname).Range("V" & 3) = "室内機１全能力"
+Sheets(sheetname).Range("W" & 3) = "室内機１平均能力"
+Sheets(sheetname).Range("X" & 3) = "室内機１部分負荷率"
+Sheets(sheetname).Range("Y" & 3) = "室内機２全能力"
+Sheets(sheetname).Range("Z" & 3) = "室内機２平均能力"
+Sheets(sheetname).Range("AA" & 3) = "室内機２部分負荷率"
+Sheets(sheetname).Range("AB" & 3) = "室内機１顕熱能力"
+Sheets(sheetname).Range("AC" & 3) = "室内機１平均顕熱"
+Sheets(sheetname).Range("AD" & 3) = "室内機１顕熱部分負荷率"
+Sheets(sheetname).Range("AE" & 3) = "室内機２顕熱能力"
+Sheets(sheetname).Range("AF" & 3) = "室内機２顕熱能力"
+Sheets(sheetname).Range("AG" & 3) = "室内機２顕熱部分負荷率"
+
+Sheets(sheetname).Range("AH" & 3) = "COP"
+
+Sheets(sheetname).Range("AI" & 3) = "顕熱COP"
+
+Dim i As Integer
+i = 6
+Dim j As Integer
+j = 1
+Dim l As Integer
+l = 0
+Dim timecount As Integer
+timecount = 0
+Dim m As Integer
+m = 0
+Dim n As Integer
+
+Dim Qr1 As Double '能力
+Qr1 = 0
+Dim Qs1 As Double '顕熱能力
+Qs1 = 0
+Dim Ql1 As Double '潜熱能力
+Ql1 = 0
+Dim WPa As Double '消費電力
+WPa = 0
+Dim AveQr As Double '平均能力
+AveQr = 0
+Dim Loadrate As Double '部分負荷率
+Loadrate = 0 '室内平均温度
+Dim MT As Double
+Dim capacity As Double
+capacity = Sheets("data").Range("H" & 4)
+
+Dim jb_start As Integer
+Dim jb_end As Integer  '吹き出し直後平均
+
+capacity = Sheets("data").Range("H" & 4)
+
+jb_start = Sheets("data").Range("X" & 4)
+jb_end = Sheets("data").Range("X" & 5)
+
+Dim jb_start2 As Integer
+Dim jb_end2 As Integer  '吹き出し直後平均
+
+jb_start2 = Sheets("data").Range("Y" & 4)
+jb_end2 = Sheets("data").Range("Y" & 5)
+
+'-----------------------------------取る
+Dim c As Integer
+c = 0
+Dim count As Integer
+    
+count = Sheets("data").Range("AB" & 2)
+    
+    
+Dim value(15) As Integer
+' セルの範囲を指定
+Do While c < count
+    value(c) = Sheets("data").Cells(5, c + 28)
+    c = c + 1
+    
+Loop
+
+
+
+'----------------------------------取る
+
+Dim timestep As Date
+timestep = Sheets("data").Cells(18, 2) - Sheets("data").Cells(17, 2)
+
+Sheets(sheetname).Range("C" & 7) = "時間00:00:00"
+Dim timestepvalue As Double
+timestepvalue = (Sheets("data").Cells(18, 2) - Sheets("data").Cells(17, 2)) * 24 * 60 * 60
+'Sheets(sheetname).Cells(4, 11) = timestepvalue
+Sheets(sheetname).Range("D" & 7) = "時間h"
+
+
+Do While i <= 9 'データ名取得
+
+Sheets(sheetname).Cells(i, j) = Sheets("data").Cells(i + 7, l + 1) 'No
+Sheets(sheetname).Cells(i, j + 1) = Format(Sheets("data").Cells(i + 7, l + 2), "hh:mm:ss") '経過時間
+
+Sheets(sheetname).Cells(i, j + 4) = Sheets("data").Cells(i + 7, l + 111)     '室内側１ 定格能力比106
+Sheets(sheetname).Cells(i, j + 5) = Sheets("data").Cells(i + 7, l + 136)   '供試機 圧縮機周波数131
+Sheets(sheetname).Cells(i, j + 6) = Sheets("data").Cells(i + 7, l + 9)    '室内側１ 吸込乾球温度(校正後) 4
+Sheets(sheetname).Cells(i, j + 7) = Sheets("data").Cells(i + 7, l + 10)    '室内側１ 吸込湿球温度(校正後)5
+Sheets(sheetname).Cells(i, j + 8) = Sheets("data").Cells(i + 7, l + 11)    '室内側１ 吹出乾球温度(校正後)6
+Sheets(sheetname).Cells(i, j + 9) = Sheets("data").Cells(i + 7, l + 12)    '室内側１ 吹出湿球温度(校正後)7
+Sheets(sheetname).Cells(i, j + 10) = Sheets("data").Cells(i + 7, l + 28)     '室内側１ 供試機風量［体積m］23
+
+
+Sheets(sheetname).Cells(i, j + 11) = Sheets("data").Cells(i + 7, l + 112)     '室内側２定格能力比107
+Sheets(sheetname).Cells(i, j + 12) = Sheets("data").Cells(i + 7, l + 37)    '室内側２ 吸込乾球温度(校正後) 32
+Sheets(sheetname).Cells(i, j + 13) = Sheets("data").Cells(i + 7, l + 38)    '室内側２ 吸込湿球温度(校正後)33
+Sheets(sheetname).Cells(i, j + 14) = Sheets("data").Cells(i + 7, l + 39)    '室内側２ 吹出乾球温度(校正後)34
+Sheets(sheetname).Cells(i, j + 15) = Sheets("data").Cells(i + 7, l + 40)    '室内側２ 吹出湿球温度(校正後)35
+Sheets(sheetname).Cells(i, j + 16) = Sheets("data").Cells(i + 7, l + 56)     '室内側２ 供試機風量［体積m］51
+
+
+Sheets(sheetname).Cells(i, j + 17) = Sheets("data").Cells(i + 7, l + 6)  '大気圧 1
+
+Sheets(sheetname).Cells(i, j + 18) = Sheets("data").Cells(i + 7, l + 14)     '室内側１ ノズル差圧9
+Sheets(sheetname).Cells(i, j + 19) = Sheets("data").Cells(i + 7, l + 15)     '室内側１ ノズル前乾球温度(校正後)10
+Sheets(sheetname).Cells(i, j + 20) = Sheets("data").Cells(i + 7, l + 16)     '室内側１ ノズル選択11
+Sheets(sheetname).Cells(i, j + 21) = Sheets("data").Cells(i + 7, l + 18)     '室内側１ 吸込み空気絶対湿度13
+Sheets(sheetname).Cells(i, j + 22) = Sheets("data").Cells(i + 7, l + 19)     '室内側1 吸込空気比体積(乾き空気基準)14
+Sheets(sheetname).Cells(i, j + 23) = Sheets("data").Cells(i + 7, l + 22)     '室内側１ 吹出空気絶対湿度17
+Sheets(sheetname).Cells(i, j + 24) = Sheets("data").Cells(i + 7, l + 23)     '室内側１ 吹出空気比体積(乾き空気基準)18
+Sheets(sheetname).Cells(i, j + 25) = Sheets("data").Cells(i + 7, l + 29)     '室内側１ 標準換算風量［体積m］24
+Sheets(sheetname).Cells(i, j + 26) = Sheets("data").Cells(i + 7, l + 32)     '室内側１ 冷暖房能力27
+Sheets(sheetname).Cells(i, j + 27) = Sheets("data").Cells(i + 7, l + 33)     '室内側１ 顕熱能力28
+Sheets(sheetname).Cells(i, j + 28) = Sheets("data").Cells(i + 7, l + 34)     '室内側１ 潜熱能力29
+Sheets(sheetname).Cells(i, j + 29) = Sheets("data").Cells(i + 7, l + 35)     '室内側１ 顕熱比30
+
+Sheets(sheetname).Cells(i, j + 30) = Sheets("data").Cells(i + 7, l + 42)     '室内側２ ノズル差圧37
+Sheets(sheetname).Cells(i, j + 31) = Sheets("data").Cells(i + 7, l + 43)     '室内側２ ノズル前乾球温度(校正後)38
+Sheets(sheetname).Cells(i, j + 32) = Sheets("data").Cells(i + 7, l + 44)     '室内側２ ノズル選択39
+Sheets(sheetname).Cells(i, j + 33) = Sheets("data").Cells(i + 7, l + 46)     '室内側２　吸込み空気絶対湿度41
+Sheets(sheetname).Cells(i, j + 34) = Sheets("data").Cells(i + 7, l + 47)     '室内側２　吸込空気比体積(乾き空気基準)42
+Sheets(sheetname).Cells(i, j + 35) = Sheets("data").Cells(i + 7, l + 50)     '室内側２ 吹出空気絶対湿度45
+Sheets(sheetname).Cells(i, j + 36) = Sheets("data").Cells(i + 7, l + 51)     '室内側２ 吹出空気比体積(乾き空気基準)46
+Sheets(sheetname).Cells(i, j + 37) = Sheets("data").Cells(i + 7, l + 57)     '室内側２ 標準換算風量［体積m］52
+Sheets(sheetname).Cells(i, j + 38) = Sheets("data").Cells(i + 7, l + 60)     '室内側２ 冷暖房能力55
+Sheets(sheetname).Cells(i, j + 39) = Sheets("data").Cells(i + 7, l + 61)     '室内側２ 顕熱能力56
+Sheets(sheetname).Cells(i, j + 40) = Sheets("data").Cells(i + 7, l + 62)     '室内側２ 潜熱能力57
+Sheets(sheetname).Cells(i, j + 41) = Sheets("data").Cells(i + 7, l + 63)     '室内側２ 顕熱比58
+
+Sheets(sheetname).Cells(i, j + 42) = Sheets("data").Cells(i + 7, l + 65)    '室外側 吸込乾球温度(校正後)60
+Sheets(sheetname).Cells(i, j + 43) = Sheets("data").Cells(i + 7, l + 66)     '室外側 吸込湿球温度(校正後)61
+Sheets(sheetname).Cells(i, j + 44) = Sheets("data").Cells(i + 7, l + 68)     '室外側 吹出乾球温度(校正後)63
+Sheets(sheetname).Cells(i, j + 45) = Sheets("data").Cells(i + 7, l + 69)     '室外側 吹出湿球温度(校正後)64
+Sheets(sheetname).Cells(i, j + 46) = Sheets("data").Cells(i + 7, l + 92)     '供試機電源 電圧87
+Sheets(sheetname).Cells(i, j + 47) = Sheets("data").Cells(i + 7, l + 94)     '供試機電源 電力89
+Sheets(sheetname).Cells(i, j + 48) = Sheets("data").Cells(i + 7, l + 100)     '供試機電源 消費電力95
+Sheets(sheetname).Cells(i, j + 49) = Sheets("data").Cells(i + 7, l + 109)     'EER 104
+
+Sheets(sheetname).Cells(i, j + 50) = Sheets("data").Cells(i + 7, l + 110)     '定格能力比105
+Sheets(sheetname).Cells(i, j + 51) = Sheets("data").Cells(i + 7, l + 113)     '定格消費電力比108
+Sheets(sheetname).Cells(i, j + 52) = Sheets("data").Cells(i + 7, l + 143)    '供試機電源 積算時間138
+
+Sheets(sheetname).Cells(i, j + 54) = Sheets("data").Cells(i + 7, l + 18)    '室内側１ 吸込絶対湿度13
+Sheets(sheetname).Cells(i, j + 55) = Sheets("data").Cells(i + 7, l + 22)     '室内側１ 吹出絶対湿度17
+Sheets(sheetname).Cells(i, j + 56) = Sheets("data").Cells(i + 7, l + 20)     '室内側１ 吸込比エンタルピ15
+Sheets(sheetname).Cells(i, j + 57) = Sheets("data").Cells(i + 7, l + 25)     '室内側１ 吸込定圧比熱20
+Sheets(sheetname).Cells(i, j + 58) = Sheets("data").Cells(i + 7, l + 23)     '室内側１ 吹出比体積18
+Sheets(sheetname).Cells(i, j + 59) = Sheets("data").Cells(i + 7, l + 30)     '室内側１ 風洞漏洩量25
+
+Sheets(sheetname).Cells(i, j + 60) = Sheets("data").Cells(i + 7, l + 46)    '室内側2 吸込絶対湿度41
+Sheets(sheetname).Cells(i, j + 61) = Sheets("data").Cells(i + 7, l + 50)     '室内側2 吹出絶対湿度45
+Sheets(sheetname).Cells(i, j + 62) = Sheets("data").Cells(i + 7, l + 48)     '室内側2 吸込比エンタルピ43
+Sheets(sheetname).Cells(i, j + 63) = Sheets("data").Cells(i + 7, l + 53)     '室内側2 吸込定圧比熱48
+Sheets(sheetname).Cells(i, j + 64) = Sheets("data").Cells(i + 7, l + 51)     '室内側2 吹出比体積46
+Sheets(sheetname).Cells(i, j + 65) = Sheets("data").Cells(i + 7, l + 58)     '室内側2 風洞漏洩量53
+
+c = 0
+Do While c < count
+Sheets(sheetname).Cells(i, j + 75 + c) = Sheets("data").Cells(i + 7, l + value(c) + 5)
+c = c + 1
+Loop
+
+i = i + 1
+Loop
+
+Sheets(sheetname).Cells(7, 54) = "消費電力×0.01"   '供試機電源 消費電力95(グラフ用)
+Sheets(sheetname).Cells(9, 54) = "W"               '供試機電源 消費電力95(グラフ用)
+
+Sheets(sheetname).Cells(7, 67) = "室内側1吹出直後温度"
+Sheets(sheetname).Cells(9, 67) = "℃"
+
+Sheets(sheetname).Cells(7, 68) = "室内側2吹出直後温度"
+Sheets(sheetname).Cells(9, 68) = "℃"
+
+Sheets(sheetname).Cells(7, 69) = "室内1吹出直後エンタルピ"
+Sheets(sheetname).Cells(9, 69) = "kJ/kg"
+
+Sheets(sheetname).Cells(7, 70) = "室内2吹出直後エンタルピ"
+Sheets(sheetname).Cells(9, 70) = "kJ/kg"
+
+Sheets(sheetname).Cells(7, 71) = "室内1吹出能力(冷)"
+Sheets(sheetname).Cells(9, 71) = "W"
+
+Sheets(sheetname).Cells(7, 72) = "室内2吹出能力(冷)"
+Sheets(sheetname).Cells(9, 72) = "W"
+
+Sheets(sheetname).Cells(7, 73) = "室内1吹出能力(暖)"
+Sheets(sheetname).Cells(9, 73) = "W"
+
+Sheets(sheetname).Cells(7, 74) = "室内2吹出能力(暖)"
+Sheets(sheetname).Cells(9, 74) = "W"
+
+'-------------------------------------------------------------------------------------------------------------------
+i = starttimerow - 7
+m = 10
+n = 0
+l = 0
+Do While i <= endtimerow - 7 'データ取得
+
+Sheets(sheetname).Cells(m, j) = Sheets("data").Cells(i + 7, l + 1) 'No
+Sheets(sheetname).Cells(m, j + 1) = Format(Sheets("data").Cells(i + 7, l + 2), "hh:mm:ss") '経過時間
+'Sheets(sheetname).Cells(m, j + 2) = n
+If i <= endtimerow Then
+Sheets(sheetname).Cells(m, j + 2) = Format(CDate(timestep * timecount), "hh:nn:ss") '時間00:00:00
+End If
+
+Sheets(sheetname).Cells(m, j + 3) = Cells(m, j + 2) * 24 '時間h
+
+Sheets(sheetname).Cells(m, j + 4) = Sheets("data").Cells(i + 7, l + 111)     '室内側１ 定格能力比106
+Sheets(sheetname).Cells(m, j + 5) = Sheets("data").Cells(i + 7, l + 136)   '供試機 圧縮機周波数131
+Sheets(sheetname).Cells(m, j + 6) = Sheets("data").Cells(i + 7, l + 9)    '室内側１ 吸込乾球温度(校正後) 4
+Sheets(sheetname).Cells(m, j + 7) = Sheets("data").Cells(i + 7, l + 10)    '室内側１ 吸込湿球温度(校正後)5
+Sheets(sheetname).Cells(m, j + 8) = Sheets("data").Cells(i + 7, l + 11)    '室内側１ 吹出乾球温度(校正後)6
+Sheets(sheetname).Cells(m, j + 9) = Sheets("data").Cells(i + 7, l + 12)    '室内側１ 吹出湿球温度(校正後)7
+Sheets(sheetname).Cells(m, j + 10) = Sheets("data").Cells(i + 7, l + 28)     '室内側１ 供試機風量［体積m］23
+
+Sheets(sheetname).Cells(m, j + 11) = Sheets("data").Cells(i + 7, l + 112)     '室内側２ 定格能力比107
+Sheets(sheetname).Cells(m, j + 12) = Sheets("data").Cells(i + 7, l + 37)    '室内側２ 吸込乾球温度(校正後) 32
+Sheets(sheetname).Cells(m, j + 13) = Sheets("data").Cells(i + 7, l + 38)    '室内側２ 吸込湿球温度(校正後)33
+Sheets(sheetname).Cells(m, j + 14) = Sheets("data").Cells(i + 7, l + 39)    '室内側２ 吹出乾球温度(校正後)34
+Sheets(sheetname).Cells(m, j + 15) = Sheets("data").Cells(i + 7, l + 40)    '室内側２ 吹出湿球温度(校正後)35
+Sheets(sheetname).Cells(m, j + 16) = Sheets("data").Cells(i + 7, l + 56)     '室内側２ 供試機風量［体積m］51
+
+Sheets(sheetname).Cells(m, j + 17) = Sheets("data").Cells(i + 7, l + 6)  '大気圧 1
+
+Sheets(sheetname).Cells(m, j + 18) = Sheets("data").Cells(i + 7, l + 14)     '室内側１ ノズル差圧9
+Sheets(sheetname).Cells(m, j + 19) = Sheets("data").Cells(i + 7, l + 15)     '室内側１ ノズル前乾球温度(校正後)10
+Sheets(sheetname).Cells(m, j + 20) = Sheets("data").Cells(i + 7, l + 16)     '室内側１ ノズル選択11
+Sheets(sheetname).Cells(m, j + 21) = Sheets("data").Cells(i + 7, l + 18)     '室内側１ 吸込み空気絶対湿度13
+Sheets(sheetname).Cells(m, j + 22) = Sheets("data").Cells(i + 7, l + 19)     '室内側1 吸込空気比体積(乾き空気基準)14
+Sheets(sheetname).Cells(m, j + 23) = Sheets("data").Cells(i + 7, l + 22)     '室内側１ 吹出空気絶対湿度17
+Sheets(sheetname).Cells(m, j + 24) = Sheets("data").Cells(i + 7, l + 23)     '室内側１ 吹出空気比体積(乾き空気基準)18
+Sheets(sheetname).Cells(m, j + 25) = Sheets("data").Cells(i + 7, l + 29)     '室内側１ 標準換算風量［体積m］24
+Sheets(sheetname).Cells(m, j + 26) = Sheets("data").Cells(i + 7, l + 32)     '室内側１ 冷暖房能力27
+Sheets(sheetname).Cells(m, j + 27) = Sheets("data").Cells(i + 7, l + 33)     '室内側１ 顕熱能力28
+Sheets(sheetname).Cells(m, j + 28) = Sheets("data").Cells(i + 7, l + 34)     '室内側１ 潜熱能力29
+Sheets(sheetname).Cells(m, j + 29) = Sheets("data").Cells(i + 7, l + 35)     '室内側１ 顕熱比30
+Sheets(sheetname).Cells(m, j + 30) = Sheets("data").Cells(i + 7, l + 42)     '室内側２ ノズル差圧37
+Sheets(sheetname).Cells(m, j + 31) = Sheets("data").Cells(i + 7, l + 43)     '室内側２ ノズル前乾球温度(校正後)38
+Sheets(sheetname).Cells(m, j + 32) = Sheets("data").Cells(i + 7, l + 44)     '室内側２ ノズル選択39
+Sheets(sheetname).Cells(m, j + 33) = Sheets("data").Cells(i + 7, l + 46)     '室内側２　吸込み空気絶対湿度41
+Sheets(sheetname).Cells(m, j + 34) = Sheets("data").Cells(i + 7, l + 47)     '室内側２　吸込空気比体積(乾き空気基準)42
+Sheets(sheetname).Cells(m, j + 35) = Sheets("data").Cells(i + 7, l + 50)     '室内側２ 吹出空気絶対湿度45
+Sheets(sheetname).Cells(m, j + 36) = Sheets("data").Cells(i + 7, l + 51)     '室内側２ 吹出空気比体積(乾き空気基準)46
+Sheets(sheetname).Cells(m, j + 37) = Sheets("data").Cells(i + 7, l + 57)     '室内側２ 標準換算風量［体積m］52
+Sheets(sheetname).Cells(m, j + 38) = Sheets("data").Cells(i + 7, l + 60)     '室内側２ 冷暖房能力55
+Sheets(sheetname).Cells(m, j + 39) = Sheets("data").Cells(i + 7, l + 61)     '室内側２ 顕熱能力56
+Sheets(sheetname).Cells(m, j + 40) = Sheets("data").Cells(i + 7, l + 62)     '室内側２ 潜熱能力57
+Sheets(sheetname).Cells(m, j + 41) = Sheets("data").Cells(i + 7, l + 63)     '室内側２ 顕熱比58
+Sheets(sheetname).Cells(m, j + 42) = Sheets("data").Cells(i + 7, l + 65)    '室外側 吸込乾球温度(校正後)60
+Sheets(sheetname).Cells(m, j + 43) = Sheets("data").Cells(i + 7, l + 66)     '室外側 吸込湿球温度(校正後)61
+Sheets(sheetname).Cells(m, j + 44) = Sheets("data").Cells(i + 7, l + 68)     '室外側 吹出乾球温度(校正後)63
+Sheets(sheetname).Cells(m, j + 45) = Sheets("data").Cells(i + 7, l + 69)     '室外側 吹出湿球温度(校正後)64
+Sheets(sheetname).Cells(m, j + 46) = Sheets("data").Cells(i + 7, l + 92)     '供試機電源 電圧87
+Sheets(sheetname).Cells(m, j + 47) = Sheets("data").Cells(i + 7, l + 94)     '供試機電源 電力89
+Sheets(sheetname).Cells(m, j + 48) = Sheets("data").Cells(i + 7, l + 100)     '供試機電源 消費電力95
+Sheets(sheetname).Cells(m, j + 49) = Sheets("data").Cells(i + 7, l + 109)     'EER 104
+
+Sheets(sheetname).Cells(m, j + 50) = Sheets("data").Cells(i + 7, l + 110)     '定格能力比105
+Sheets(sheetname).Cells(m, j + 51) = Sheets("data").Cells(i + 7, l + 113)     '定格消費電力比108
+Sheets(sheetname).Cells(m, j + 52) = Sheets("data").Cells(i + 7, l + 143)    '供試機電源 積算時間138
+Sheets(sheetname).Cells(m, j + 53) = Sheets(sheetname).Cells(m, j + 48) * 0.01  '消費電力×0.1
+
+Sheets(sheetname).Cells(m, j + 54) = Sheets("data").Cells(i + 7, l + 18)    '室内側１ 吸込絶対湿度13
+Sheets(sheetname).Cells(m, j + 55) = Sheets("data").Cells(i + 7, l + 22)     '室内側１ 吹出絶対湿度17
+Sheets(sheetname).Cells(m, j + 56) = Sheets("data").Cells(i + 7, l + 20)     '室内側１ 吸込比エンタルピ15
+Sheets(sheetname).Cells(m, j + 57) = Sheets("data").Cells(i + 7, l + 25)     '室内側１ 吸込定圧比熱20
+Sheets(sheetname).Cells(m, j + 58) = Sheets("data").Cells(i + 7, l + 23)     '室内側１ 吹出比体積18
+Sheets(sheetname).Cells(m, j + 59) = Sheets("data").Cells(i + 7, l + 30)     '室内側１ 風洞漏洩量25
+
+Sheets(sheetname).Cells(m, j + 60) = Sheets("data").Cells(i + 7, l + 46)    '室内側2 吸込絶対湿度41
+Sheets(sheetname).Cells(m, j + 61) = Sheets("data").Cells(i + 7, l + 50)     '室内側2 吹出絶対湿度45
+Sheets(sheetname).Cells(m, j + 62) = Sheets("data").Cells(i + 7, l + 48)     '室内側2 吸込比エンタルピ43
+Sheets(sheetname).Cells(m, j + 63) = Sheets("data").Cells(i + 7, l + 53)     '室内側2 吸込定圧比熱48
+Sheets(sheetname).Cells(m, j + 64) = Sheets("data").Cells(i + 7, l + 51)     '室内側2 吹出比体積46
+Sheets(sheetname).Cells(m, j + 65) = Sheets("data").Cells(i + 7, l + 58)     '室内側2 風洞漏洩量53
+
+Sheets(sheetname).Cells(m, j + 66) = WorksheetFunction.Average(Range(Sheets("data").Cells(i + 7, jb_start + 5 + l), Sheets("data").Cells(i + 7, jb_end + 5 + l))) '吹き出し温度1
+Sheets(sheetname).Cells(m, j + 67) = WorksheetFunction.Average(Range(Sheets("data").Cells(i + 7, jb_start2 + 5 + l), Sheets("data").Cells(i + 7, jb_end2 + 5 + l))) '吹き出し温度2
+
+Sheets(sheetname).Cells(m, j + 68) = 1.005 * Sheets(sheetname).Cells(m, j + 66) + Sheets(sheetname).Cells(m, j + 61) * (0.001846 * Sheets(sheetname).Cells(m, j + 66) + 2.501) '室内側1 吹出直エンタ
+Sheets(sheetname).Cells(m, j + 69) = 1.005 * Sheets(sheetname).Cells(m, j + 66) + Sheets(sheetname).Cells(m, j + 61) * (0.001846 * Sheets(sheetname).Cells(m, j + 66) + 2.501)   '室内側2 吹出直エンタ
+Sheets(sheetname).Cells(m, j + 70) = Sheets(sheetname).Cells(m, j + 10) * (Sheets(sheetname).Cells(m, j + 56) - Sheets(sheetname).Cells(m, j + 68)) * 1000 / (Sheets(sheetname).Cells(m, j + 58) * 60) '室内側1 吹出直能力(冷)
+Sheets(sheetname).Cells(m, j + 71) = Sheets(sheetname).Cells(m, j + 16) * (Sheets(sheetname).Cells(m, j + 62) - Sheets(sheetname).Cells(m, j + 69)) * 1000 / (Sheets(sheetname).Cells(m, j + 64) * 60)  '室内側2 吹出直能力(冷)
+Sheets(sheetname).Cells(m, j + 72) = Sheets(sheetname).Cells(m, j + 10) * (Sheets(sheetname).Cells(m, j + 66) - Sheets(sheetname).Cells(m, j + 6)) * 1005 / (Sheets(sheetname).Cells(m, j + 58) * 60)    '室内側1 吹出直能力(暖)
+Sheets(sheetname).Cells(m, j + 73) = Sheets(sheetname).Cells(m, j + 16) * (Sheets(sheetname).Cells(m, j + 66) - Sheets(sheetname).Cells(m, j + 12)) * 1005 / (Sheets(sheetname).Cells(m, j + 64) * 60)  '室内側2 吹出直能力(暖)
+
+c = 0
+Do While c < count
+Sheets(sheetname).Cells(m, j + 75 + c) = Sheets("data").Cells(i + 7, l + value(c) + 5)
+c = c + 1
+Loop
+
+i = i + 1
+m = m + 1
+n = n + 0.0002777777778
+timecount = timecount + 1
+
+Loop
+Dim enddatarow As Integer
+enddatarow = m
+
+Sheets(sheetname).Cells(1, 6) = jb_end + 5 + l
+
+'----------------------------------------------------------------------積算値時間探索1
+Dim Integrated_starttime As Date
+Dim Integrated_endtime As Date
+
+Integrated_starttime = CDate(Sheets("data").Cells(4, 13).value)
+Integrated_endtime = CDate(Sheets("data").Cells(5, 13).value)
+
+Dim Integrated_starttimerow As Integer
+Dim Integrated_endtimerow As Integer
+Dim Integrated_firsttime As Date
+Dim Integrated_secondtime As Date
+
+
+Integrated_starttimerow = 10
+Integrated_firsttime = CDate(Sheets(sheetname).Cells(Integrated_starttimerow, 2))
+Do Until Integrated_firsttime = Integrated_starttime
+Integrated_starttimerow = Integrated_starttimerow + 1
+Integrated_firsttime = CDate(Sheets(sheetname).Cells(Integrated_starttimerow, 2))
+Loop
+
+Integrated_endtimerow = Integrated_starttimerow
+Integrated_secondtime = CDate(Sheets(sheetname).Cells(Integrated_endtimerow, 2))
+Do Until Integrated_secondtime = Integrated_endtime
+Integrated_endtimerow = Integrated_endtimerow + 1
+Integrated_secondtime = CDate(Sheets(sheetname).Cells(Integrated_endtimerow, 2))
+Loop
+
+Sheets(sheetname).Range("M" & 1) = "I_starttime1"
+Sheets(sheetname).Range("N" & 1) = Format(CDate(Integrated_starttime), "hh:mm:ss")
+Sheets(sheetname).Range("P" & 1) = Format(CDate((Integrated_starttime) - CDate(starttime)), "hh:mm:ss")
+Sheets(sheetname).Range("P" & 2) = Format(CDate((Integrated_starttime) - CDate(starttime)), "hh:mm:ss")
+Sheets(sheetname).Range("Q" & 1) = Sheets(sheetname).Range("P" & 1) * 24
+Sheets(sheetname).Range("Q" & 2) = Sheets(sheetname).Range("P" & 2) * 24
+
+Sheets(sheetname).Range("M" & 2) = "I_endtime1"
+Sheets(sheetname).Range("N" & 2) = Format(CDate(Integrated_endtime), "hh:mm:ss")
+Sheets(sheetname).Range("R" & 1) = Format(CDate((Integrated_endtime) - CDate(starttime)), "hh:mm:ss")
+Sheets(sheetname).Range("R" & 2) = Format(CDate((Integrated_endtime) - CDate(starttime)), "hh:mm:ss")
+Sheets(sheetname).Range("S" & 1) = Sheets(sheetname).Range("R" & 1) * 24
+Sheets(sheetname).Range("S" & 2) = Sheets(sheetname).Range("R" & 2) * 24
+
+'----------------------------------------------------------------------積算値時間探索2
+Dim Integrated_starttime2 As Date
+Dim Integrated_endtime2 As Date
+
+Integrated_starttime2 = CDate(Sheets("data").Cells(4, 20).value)
+Integrated_endtime2 = CDate(Sheets("data").Cells(5, 20).value)
+
+Dim Integrated_starttimerow2 As Integer
+Dim Integrated_endtimerow2 As Integer
+Dim Integrated_firsttime2 As Date
+Dim Integrated_secondtime2 As Date
+
+
+Integrated_starttimerow2 = 10
+Integrated_firsttime2 = CDate(Sheets(sheetname).Cells(Integrated_starttimerow2, 2))
+Do Until Integrated_firsttime2 = Integrated_starttime2
+Integrated_starttimerow2 = Integrated_starttimerow2 + 1
+Integrated_firsttime2 = CDate(Sheets(sheetname).Cells(Integrated_starttimerow2, 2))
+Loop
+
+Integrated_endtimerow2 = Integrated_starttimerow2
+Integrated_secondtime2 = CDate(Sheets(sheetname).Cells(Integrated_endtimerow2, 2))
+Do Until Integrated_secondtime2 = Integrated_endtime2
+Integrated_endtimerow2 = Integrated_endtimerow2 + 1
+Integrated_secondtime2 = CDate(Sheets(sheetname).Cells(Integrated_endtimerow2, 2))
+Loop
+
+Sheets(sheetname).Range("V" & 1) = "I_starttime2"
+Sheets(sheetname).Range("W" & 1) = Format(CDate(Integrated_starttime2), "hh:mm:ss")
+Sheets(sheetname).Range("Y" & 1) = Format(CDate((Integrated_starttime2) - CDate(starttime)), "hh:mm:ss")
+Sheets(sheetname).Range("Y" & 2) = Format(CDate((Integrated_starttime2) - CDate(starttime)), "hh:mm:ss")
+Sheets(sheetname).Range("Z" & 1) = Sheets(sheetname).Range("Y" & 1) * 24
+Sheets(sheetname).Range("Z" & 2) = Sheets(sheetname).Range("Y" & 2) * 24
+
+Sheets(sheetname).Range("V" & 2) = "I_endtime2"
+Sheets(sheetname).Range("W" & 2) = Format(CDate(Integrated_endtime2), "hh:mm:ss")
+Sheets(sheetname).Range("AA" & 1) = Format(CDate((Integrated_endtime2) - CDate(starttime)), "hh:mm:ss")
+Sheets(sheetname).Range("AA" & 2) = Format(CDate((Integrated_endtime2) - CDate(starttime)), "hh:mm:ss")
+Sheets(sheetname).Range("AB" & 1) = Sheets(sheetname).Range("AA" & 1) * 24
+Sheets(sheetname).Range("AB" & 2) = Sheets(sheetname).Range("AA" & 2) * 24
+
+
+Sheets(sheetname).Range("T" & 1) = 1
+Sheets(sheetname).Range("T" & 2) = 200
+
+
+'---------------------------------------------------------------------------------------------積算値算出
+Sheets(sheetname).Cells(4, 2) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow, 27), Sheets(sheetname).Cells(Integrated_endtimerow, 27))) * timestepvalue  '室内機1能力
+Sheets(sheetname).Cells(4, 3) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow, 28), Sheets(sheetname).Cells(Integrated_endtimerow, 28))) * timestepvalue  '室内機1顕熱能力
+Sheets(sheetname).Cells(4, 4) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow, 29), Sheets(sheetname).Cells(Integrated_endtimerow, 29))) * timestepvalue  '室内機1潜熱能力
+
+Sheets(sheetname).Cells(4, 5) = Sheets(sheetname).Cells(4, 3) / Sheets(sheetname).Cells(4, 2)  '室内機1顕熱比
+
+Sheets(sheetname).Cells(4, 6) = Sheets(sheetname).Cells(4, 2) / (Integrated_endtimerow - Integrated_starttimerow + 1) / timestepvalue  '室内機1平均能力
+Sheets(sheetname).Cells(4, 7) = Sheets(sheetname).Cells(4, 6) / capacity * 100  '室内機１部分負荷率
+Sheets(sheetname).Cells(4, 8) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow, 7), Sheets(sheetname).Cells(Integrated_endtimerow, 7))) / (Integrated_endtimerow - Integrated_starttimerow + 1)  '室内機1室内平均温度
+
+
+Sheets(sheetname).Cells(4, 9) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow2, 39), Sheets(sheetname).Cells(Integrated_endtimerow2, 39))) * timestepvalue  '室内機2能力
+Sheets(sheetname).Cells(4, 10) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow2, 40), Sheets(sheetname).Cells(Integrated_endtimerow2, 40))) * timestepvalue  '室内機2顕熱能力
+Sheets(sheetname).Cells(4, 11) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow2, 41), Sheets(sheetname).Cells(Integrated_endtimerow2, 41))) * timestepvalue  '室内機2潜熱能力
+
+Sheets(sheetname).Cells(4, 12) = Sheets(sheetname).Cells(4, 10) / Sheets(sheetname).Cells(4, 9)  '室内機2顕熱比
+
+Sheets(sheetname).Cells(4, 13) = Sheets(sheetname).Cells(4, 9) / (Integrated_endtimerow2 - Integrated_starttimerow2 + 1) / timestepvalue  '室内機2平均能力
+Sheets(sheetname).Cells(4, 14) = Sheets(sheetname).Cells(4, 13) / capacity * 100  '室内機2部分負荷率
+Sheets(sheetname).Cells(4, 15) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow2, 13), Sheets(sheetname).Cells(Integrated_endtimerow2, 13))) / (Integrated_endtimerow2 - Integrated_starttimerow2 + 1)  '室内機2室内平均温度
+
+Sheets(sheetname).Cells(4, 16) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow2, 49), Sheets(sheetname).Cells(Integrated_endtimerow2, 49))) * timestepvalue  '消費電力
+
+'Sheets(sheetname).Cells(4, 17) = (Sheets(sheetname).Cells(4, 9)) / Sheets(sheetname).Cells(4, 16)  'COP室内機2
+Sheets(sheetname).Cells(4, 17) = (Sheets(sheetname).Cells(4, 2) + Sheets(sheetname).Cells(4, 9)) / Sheets(sheetname).Cells(4, 16)  'COPマルチ
+
+'--------------------------------------------------------------------------------------------積算値算出(吹出直後)
+
+
+
+Sheets(sheetname).Cells(4, 22) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow, 71), Sheets(sheetname).Cells(Integrated_endtimerow, 71))) * timestepvalue  '室内機直1能力
+
+Sheets(sheetname).Cells(4, 23) = Sheets(sheetname).Cells(4, 22) / (Integrated_endtimerow - Integrated_starttimerow + 1) / timestepvalue  '室内機1平均直能力
+Sheets(sheetname).Cells(4, 24) = Sheets(sheetname).Cells(4, 23) / capacity * 100  '室内機１直部分負荷率
+
+Sheets(sheetname).Cells(4, 25) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow2, 72), Sheets(sheetname).Cells(Integrated_endtimerow2, 72))) * timestepvalue  '室内機2直能力
+
+Sheets(sheetname).Cells(4, 26) = Sheets(sheetname).Cells(4, 25) / (Integrated_endtimerow2 - Integrated_starttimerow2 + 1) / timestepvalue  '室内機2直平均能力
+Sheets(sheetname).Cells(4, 27) = Sheets(sheetname).Cells(4, 26) / capacity * 100  '室内機2直部分負荷率
+
+Sheets(sheetname).Cells(4, 28) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow, 73), Sheets(sheetname).Cells(Integrated_endtimerow, 73))) * timestepvalue  '室内機1直顕熱能力
+
+Sheets(sheetname).Cells(4, 29) = Sheets(sheetname).Cells(4, 28) / (Integrated_endtimerow - Integrated_starttimerow + 1) / timestepvalue  '室内機1平均直顕熱能力
+Sheets(sheetname).Cells(4, 30) = Sheets(sheetname).Cells(4, 29) / capacity * 100  '室内機１直顕熱部分負荷率
+
+Sheets(sheetname).Cells(4, 31) = WorksheetFunction.Sum(Range(Sheets(sheetname).Cells(Integrated_starttimerow2, 74), Sheets(sheetname).Cells(Integrated_endtimerow2, 74))) * timestepvalue  '室内機2顕熱直能力
+
+Sheets(sheetname).Cells(4, 32) = Sheets(sheetname).Cells(4, 31) / (Integrated_endtimerow2 - Integrated_starttimerow2 + 1) / timestepvalue  '室内機2平均直顕熱能力
+Sheets(sheetname).Cells(4, 33) = Sheets(sheetname).Cells(4, 32) / capacity * 100  '室内機2直顕熱部分負荷率
+
+
+'Sheets(sheetname).Cells(4, 34) = (Sheets(sheetname).Cells(4, 22)) / Sheets(sheetname).Cells(4, 16)  'COP室内機2直
+Sheets(sheetname).Cells(4, 34) = (Sheets(sheetname).Cells(4, 22) + Sheets(sheetname).Cells(4, 25)) / Sheets(sheetname).Cells(4, 16)  'COPマルチ直顕熱
+'Sheets(sheetname).Cells(4, 35) = (Sheets(sheetname).Cells(4, 28)) / Sheets(sheetname).Cells(4, 16)  'COP室内機2直顕熱
+Sheets(sheetname).Cells(4, 35) = (Sheets(sheetname).Cells(4, 28) + Sheets(sheetname).Cells(4, 31)) / Sheets(sheetname).Cells(4, 16)  'COPマルチ直顕熱
+
+
+
+
+'--------------------------------------------------------------------------------------------グラフ作成1
+    Dim chtObj As ChartObject
+    Set chtObj = Sheets(sheetname).ChartObjects.Add(0, 0, 400, 300)
+    
+    'get refernce to chart object
+    Dim cht As Chart
+    Set cht = chtObj.Chart
+    
+ With ActiveSheet.ChartObjects(1)
+        .Name = "Chart1"
+        .Top = Range("D12").Top
+        .Left = Range("D12").Left
+        .Height = 250
+        .Width = 400 '大きさを設定
+    
+    With .Chart.ChartArea.Format.TextFrame2.TextRange.Font  'フォント変更
+        .NameComplexScript = "Times New Roman"
+        .NameFarEast = "Times New Roman"
+        .Name = "Times New Roman"
+        .Bold = msoFalse
+    End With
+    
+    
+    
+    With .Chart
+        
+        .HasTitle = True 'タイトル設定
+        .ChartTitle.Text = Sheets("data").Cells(2, 12) 'タイトル文字列
+        
+        .HasLegend = False '凡例表示
+        '.Legend.Position = xlLegendPositionRight '凡例表示位置(右側)
+        
+    End With
+        
+End With
+    
+
+
+ActiveSheet.ChartObjects("Chart1").Select
+
+'    新しくデータ系列を作成します
+    ActiveChart.SeriesCollection.NewSeries
+
+'    作成したデータ系列に対して､
+'    グラフの種類・X軸の項目・データの範囲・凡例を指定します
+    With ActiveChart.SeriesCollection(1)       'グラフの種類を設定
+        .ChartType = xlXYScatterSmoothNoMarkers       'X軸の項目軸を指定
+        .XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4)) 'データの指定
+        .Values = Range(Sheets(sheetname).Cells(10, 5), Sheets(sheetname).Cells(enddatarow, 5))  '凡例の指定
+        
+        .Name = "Indoor1 PLR"
+ 
+    End With
+   
+
+'---------------------------------------------------------------------------------------------------データ追加
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(2).Name = "=""Compressor speed"""
+    ActiveChart.FullSeriesCollection(2).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(2).Values = Range(Sheets(sheetname).Cells(10, 6), Sheets(sheetname).Cells(enddatarow, 6))
+
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(3).Name = "=""Indoor1 suction temperature"""
+    ActiveChart.FullSeriesCollection(3).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(3).Values = Range(Sheets(sheetname).Cells(10, 7), Sheets(sheetname).Cells(enddatarow, 7))
+
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(4).Name = "=""Indoor1 suction wet temperature"""
+    ActiveChart.FullSeriesCollection(4).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(4).Values = Range(Sheets(sheetname).Cells(10, 8), Sheets(sheetname).Cells(enddatarow, 8))
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(5).Name = "=""Indoor1 browout temperature"""
+    ActiveChart.FullSeriesCollection(5).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(5).Values = Range(Sheets(sheetname).Cells(10, 9), Sheets(sheetname).Cells(enddatarow, 9))
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(6).Name = "=""Indoor1 browout wet temperature"""
+    ActiveChart.FullSeriesCollection(6).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(6).Values = Range(Sheets(sheetname).Cells(10, 10), Sheets(sheetname).Cells(enddatarow, 10))
+    
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(7).Name = "=""Indoor1 Air flow rate"""
+    ActiveChart.FullSeriesCollection(7).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(7).Values = Range(Sheets(sheetname).Cells(10, 11), Sheets(sheetname).Cells(enddatarow, 11))
+    
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(8).Name = "=""start"""
+    ActiveChart.FullSeriesCollection(8).XValues = Range(Sheets(sheetname).Cells(1, 17), Sheets(sheetname).Cells(2, 17))
+    ActiveChart.FullSeriesCollection(8).Values = Range(Sheets(sheetname).Cells(1, 20), Sheets(sheetname).Cells(2, 20))
+    
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(9).Name = "=""end"""
+    ActiveChart.FullSeriesCollection(9).XValues = Range(Sheets(sheetname).Cells(1, 19), Sheets(sheetname).Cells(2, 19))
+    ActiveChart.FullSeriesCollection(9).Values = Range(Sheets(sheetname).Cells(1, 20), Sheets(sheetname).Cells(2, 20))
+    
+    '------------------------------------------------------------------------------------------------------軸分け
+
+    ActiveChart.ChartArea.Select
+    
+    ActiveChart.FullSeriesCollection(1).Select
+    
+    ActiveChart.FullSeriesCollection(3).Select
+    ActiveChart.FullSeriesCollection(3).AxisGroup = 2
+    
+    ActiveSheet.ChartObjects("Chart1").Activate
+    ActiveChart.FullSeriesCollection(4).Select
+    ActiveChart.FullSeriesCollection(4).AxisGroup = 2
+    
+    ActiveSheet.ChartObjects("Chart1").Activate
+    ActiveChart.FullSeriesCollection(4).Select
+    ActiveChart.FullSeriesCollection(7).Select
+    ActiveChart.FullSeriesCollection(6).Select
+    ActiveChart.FullSeriesCollection(6).AxisGroup = 2
+    ActiveSheet.ChartObjects("Chart1").Activate
+    ActiveChart.FullSeriesCollection(6).Select
+    ActiveChart.FullSeriesCollection(5).Select
+    ActiveChart.FullSeriesCollection(5).AxisGroup = 2
+    ActiveSheet.ChartObjects("Chart1").Activate
+    ActiveChart.FullSeriesCollection(5).Select
+    Application.CommandBars("Format Object").Visible = False
+    
+     '------------------------------------------------------------------------------------------------------横軸(h)'
+
+    ActiveSheet.ChartObjects("Chart1").Activate
+    ActiveChart.Axes(xlCategory).Select
+    Selection.TickLabels.NumberFormatLocal = "G/標準"
+    
+    
+ 
+     '------------------------------------------------------------------------------------------------------枠色変更
+
+    ActiveSheet.ChartObjects("Chart1").Activate
+    ActiveChart.PlotArea.Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorText1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0
+        .Transparency = 0
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .Weight = 1.5
+    End With
+    
+    ActiveSheet.Shapes("Chart1").Line.Visible = msoFalse
+    ActiveChart.Axes(xlValue).MajorGridlines.Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorText1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0
+        .Transparency = 0
+    End With
+    
+     ActiveSheet.ChartObjects("Chart1").Activate
+        ActiveChart.PlotArea.Select
+    Selection.Width = 500
+    Selection.Left = 57.5
+    
+    
+    
+    ActiveChart.FullSeriesCollection(8).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorBackground1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = -0.5
+        .Transparency = 0
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    
+    ActiveChart.FullSeriesCollection(9).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorBackground1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = -0.5
+        .Transparency = 0
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    
+    
+    
+    ActiveChart.FullSeriesCollection(1).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(0, 0, 0)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(2).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(0, 176, 80)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(3).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(255, 0, 0)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(4).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(191, 144, 0)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(5).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(255, 192, 0)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(6).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(98, 153, 62)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+ 
+    ActiveChart.FullSeriesCollection(7).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(0, 112, 192)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+  
+    ActiveWindow.SmallScroll Down:=-3
+    ActiveChart.FullSeriesCollection(6).Select
+    ActiveChart.FullSeriesCollection(5).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(255, 192, 0)
+        .Transparency = 0
+    End With
+
+   
+
+'-----------------------------------------------------------軸タイトル
+
+' グラフのX軸(横軸)のタイトルを設定
+ActiveChart.Axes(xlCategory, xlPrimary).HasTitle = True
+ActiveChart.Axes(xlCategory, xlPrimary).AxisTitle.Characters.Text = "Time hour"
+ActiveChart.Axes(xlCategory, xlPrimary).AxisTitle.Select
+Selection.Format.TextFrame2.TextRange.Characters(6, 4).Font.Bold = msoTrue
+
+
+' グラフのY軸(縦軸)のタイトルを設定
+ActiveChart.Axes(xlValue, xlPrimary).HasTitle = True
+ActiveChart.Axes(xlValue, xlPrimary).AxisTitle.Characters.Text = "PLR % / Compressor speed Hz / " & Chr(13) & "Air flow rate m3/min"
+ActiveChart.Axes(xlValue, xlPrimary).AxisTitle.Select
+With Selection.Format.TextFrame2.TextRange
+    .Characters(5, 1).Font.Bold = msoTrue
+    .Characters(26, 2).Font.Bold = msoTrue
+    .Characters(46, 6).Font.Bold = msoTrue
+    .Characters(47, 1).Font.BaselineOffset = 0.3
+End With
+
+' グラフのY軸(縦軸)のタイトルを設定
+ActiveChart.Axes(xlValue, xlSecondary).HasTitle = True
+ActiveChart.Axes(xlValue, xlSecondary).AxisTitle.Characters.Text = "Temperature ℃"
+ActiveChart.Axes(xlValue, xlSecondary).AxisTitle.Select
+Selection.Format.TextFrame2.TextRange.Characters(13, 1).Font.Bold = msoTrue
+
+'-----------------------------------------------------------グラフレイアウト変更
+
+ActiveSheet.ChartObjects("Chart1").Activate
+ActiveChart.Axes(xlCategory).Select
+Selection.TickLabelPosition = xlLow
+
+ActiveChart.Axes(xlCategory, xlPrimary).TickLabels.Font.Size = 12
+ActiveChart.Axes(xlCategory, xlPrimary).AxisTitle.Characters.Font.Size = 14
+
+ActiveChart.Axes(xlValue, xlPrimary).TickLabels.Font.Size = 12
+ActiveChart.Axes(xlValue, xlPrimary).AxisTitle.Characters.Font.Size = 14
+
+ActiveChart.Axes(xlValue, xlSecondary).TickLabels.Font.Size = 12
+ActiveChart.Axes(xlValue, xlSecondary).AxisTitle.Characters.Font.Size = 14
+
+chtObj.Chart.PlotArea.Select
+With Selection
+    .Height = 180
+    .Width = 340
+    .Top = 45
+    .Left = 34
+End With
+
+ActiveChart.Axes(xlValue).AxisTitle.Select
+    Selection.Top = 43
+
+
+'--------------------------------------------------------------------------------------------グラフ作成2
+ Dim chtObj2 As ChartObject
+    Set chtObj2 = Sheets(sheetname).ChartObjects.Add(0, 0, 600, 300)
+    
+    'get refernce to chart object
+    Dim cht2 As Chart
+    Set cht2 = chtObj2.Chart
+    
+    
+ With ActiveSheet.ChartObjects("グラフ 2")
+        .Name = "Chart2"
+        .Top = Range("R12").Top
+        .Left = Range("R12").Left
+        .Height = 250
+        .Width = 400 '大きさを設定
+    
+    With .Chart.ChartArea.Format.TextFrame2.TextRange.Font  'フォント変更
+        .NameComplexScript = "Times New Roman"
+        .NameFarEast = "Times New Roman"
+        .Name = "Times New Roman"
+        .Bold = msoFalse
+    End With
+    
+        With .Chart
+        
+        .HasTitle = True 'タイトル設定
+        .ChartTitle.Text = Sheets("data").Cells(2, 19) 'タイトル文字列
+        
+        .HasLegend = False '凡例表示
+        '.Legend.Position = xlLegendPositionRight '凡例表示位置(右側)
+        
+        End With
+        
+    End With
+    
+    ActiveSheet.ChartObjects("Chart2").Select
+
+'    新しくデータ系列を作成します
+    ActiveChart.SeriesCollection.NewSeries
+
+'    作成したデータ系列に対して､
+'    グラフの種類・X軸の項目・データの範囲・凡例を指定します
+    With ActiveChart.SeriesCollection(1)       'グラフの種類を設定
+        .ChartType = xlXYScatterSmoothNoMarkers       'X軸の項目軸を指定
+        .XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4)) 'データの指定
+        .Values = Range(Sheets(sheetname).Cells(10, 12), Sheets(sheetname).Cells(enddatarow, 12))  '凡例の指定
+        
+        .Name = "Indoor2 PLR"
+ 
+    End With
+   
+
+'---------------------------------------------------------------------------------------------------データ追加
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(2).Name = "=""Compressor speed"""
+    ActiveChart.FullSeriesCollection(2).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(2).Values = Range(Sheets(sheetname).Cells(10, 6), Sheets(sheetname).Cells(enddatarow, 6))
+
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(3).Name = "=""Indoor2 suction temperature"""
+    ActiveChart.FullSeriesCollection(3).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(3).Values = Range(Sheets(sheetname).Cells(10, 13), Sheets(sheetname).Cells(enddatarow, 13))
+
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(4).Name = "=""Indoor2 suction wet temperature"""
+    ActiveChart.FullSeriesCollection(4).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(4).Values = Range(Sheets(sheetname).Cells(10, 14), Sheets(sheetname).Cells(enddatarow, 14))
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(5).Name = "=""Indoor2 browout temperature"""
+    ActiveChart.FullSeriesCollection(5).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(5).Values = Range(Sheets(sheetname).Cells(10, 15), Sheets(sheetname).Cells(enddatarow, 15))
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(6).Name = "=""Indoor2 browout wet temperature"""
+    ActiveChart.FullSeriesCollection(6).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(6).Values = Range(Sheets(sheetname).Cells(10, 16), Sheets(sheetname).Cells(enddatarow, 16))
+    
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(7).Name = "=""Indoor2 Air flow rate"""
+    ActiveChart.FullSeriesCollection(7).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(7).Values = Range(Sheets(sheetname).Cells(10, 17), Sheets(sheetname).Cells(enddatarow, 17))
+    
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(8).Name = "=""start"""
+    ActiveChart.FullSeriesCollection(8).XValues = Range(Sheets(sheetname).Cells(1, 26), Sheets(sheetname).Cells(2, 26))
+    ActiveChart.FullSeriesCollection(8).Values = Range(Sheets(sheetname).Cells(1, 20), Sheets(sheetname).Cells(2, 20))
+    
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(9).Name = "=""end"""
+    ActiveChart.FullSeriesCollection(9).XValues = Range(Sheets(sheetname).Cells(1, 28), Sheets(sheetname).Cells(2, 28))
+    ActiveChart.FullSeriesCollection(9).Values = Range(Sheets(sheetname).Cells(1, 20), Sheets(sheetname).Cells(2, 20))
+    
+    '------------------------------------------------------------------------------------------------------軸分け
+
+    ActiveChart.ChartArea.Select
+    
+    ActiveChart.FullSeriesCollection(1).Select
+    
+    ActiveChart.FullSeriesCollection(3).Select
+    ActiveChart.FullSeriesCollection(3).AxisGroup = 2
+    
+    ActiveSheet.ChartObjects("Chart2").Activate
+    ActiveChart.FullSeriesCollection(4).Select
+    ActiveChart.FullSeriesCollection(4).AxisGroup = 2
+    
+    ActiveSheet.ChartObjects("Chart2").Activate
+    ActiveChart.FullSeriesCollection(4).Select
+    ActiveChart.FullSeriesCollection(7).Select
+    ActiveChart.FullSeriesCollection(6).Select
+    ActiveChart.FullSeriesCollection(6).AxisGroup = 2
+    ActiveSheet.ChartObjects("Chart2").Activate
+    ActiveChart.FullSeriesCollection(6).Select
+    ActiveChart.FullSeriesCollection(5).Select
+    ActiveChart.FullSeriesCollection(5).AxisGroup = 2
+    ActiveSheet.ChartObjects("Chart2").Activate
+    ActiveChart.FullSeriesCollection(5).Select
+    Application.CommandBars("Format Object").Visible = False
+    
+     '------------------------------------------------------------------------------------------------------横軸(h)'
+
+    ActiveSheet.ChartObjects("Chart2").Activate
+    ActiveChart.Axes(xlCategory).Select
+    Selection.TickLabels.NumberFormatLocal = "G/標準"
+    
+    
+ 
+     '------------------------------------------------------------------------------------------------------枠色変更
+
+    ActiveSheet.ChartObjects("Chart2").Activate
+    ActiveChart.PlotArea.Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorText1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0
+        .Transparency = 0
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .Weight = 1.5
+    End With
+    
+    ActiveSheet.Shapes("Chart2").Line.Visible = msoFalse
+    ActiveChart.Axes(xlValue).MajorGridlines.Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorText1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0
+        .Transparency = 0
+    End With
+    
+     ActiveSheet.ChartObjects("Chart2").Activate
+        ActiveChart.PlotArea.Select
+    Selection.Width = 500
+    Selection.Left = 57.5
+    
+    
+    
+    ActiveChart.FullSeriesCollection(8).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorBackground1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = -0.5
+        .Transparency = 0
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    
+    ActiveChart.FullSeriesCollection(9).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorBackground1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = -0.5
+        .Transparency = 0
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    
+    
+    
+    ActiveChart.FullSeriesCollection(1).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(0, 0, 0)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(2).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(0, 176, 80)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(3).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(255, 0, 0)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(4).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(191, 144, 0)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(5).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(255, 192, 0)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(6).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(98, 153, 62)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+ 
+    ActiveChart.FullSeriesCollection(7).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(0, 112, 192)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+  
+    ActiveWindow.SmallScroll Down:=-3
+    ActiveChart.FullSeriesCollection(6).Select
+    ActiveChart.FullSeriesCollection(5).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(255, 192, 0)
+        .Transparency = 0
+    End With
+
+   
+
+'-----------------------------------------------------------軸タイトル
+
+' グラフのX軸(横軸)のタイトルを設定
+ActiveChart.Axes(xlCategory, xlPrimary).HasTitle = True
+ActiveChart.Axes(xlCategory, xlPrimary).AxisTitle.Characters.Text = "Time hour"
+ActiveChart.Axes(xlCategory, xlPrimary).AxisTitle.Select
+Selection.Format.TextFrame2.TextRange.Characters(6, 4).Font.Bold = msoTrue
+
+
+' グラフのY軸(縦軸)のタイトルを設定
+ActiveChart.Axes(xlValue, xlPrimary).HasTitle = True
+ActiveChart.Axes(xlValue, xlPrimary).AxisTitle.Characters.Text = "PLR % / Compressor speed Hz / " & Chr(13) & "Air flow rate m3/min"
+ActiveChart.Axes(xlValue, xlPrimary).AxisTitle.Select
+With Selection.Format.TextFrame2.TextRange
+    .Characters(5, 1).Font.Bold = msoTrue
+    .Characters(26, 2).Font.Bold = msoTrue
+    .Characters(46, 6).Font.Bold = msoTrue
+    .Characters(47, 1).Font.BaselineOffset = 0.3
+End With
+
+' グラフのY軸(縦軸)のタイトルを設定
+ActiveChart.Axes(xlValue, xlSecondary).HasTitle = True
+ActiveChart.Axes(xlValue, xlSecondary).AxisTitle.Characters.Text = "Temperature ℃"
+ActiveChart.Axes(xlValue, xlSecondary).AxisTitle.Select
+Selection.Format.TextFrame2.TextRange.Characters(13, 1).Font.Bold = msoTrue
+
+'-----------------------------------------------------------グラフレイアウト変更
+
+ActiveSheet.ChartObjects("Chart2").Activate
+ActiveChart.Axes(xlCategory).Select
+Selection.TickLabelPosition = xlLow
+
+ActiveChart.Axes(xlCategory, xlPrimary).TickLabels.Font.Size = 12
+ActiveChart.Axes(xlCategory, xlPrimary).AxisTitle.Characters.Font.Size = 14
+
+ActiveChart.Axes(xlValue, xlPrimary).TickLabels.Font.Size = 12
+ActiveChart.Axes(xlValue, xlPrimary).AxisTitle.Characters.Font.Size = 14
+
+ActiveChart.Axes(xlValue, xlSecondary).TickLabels.Font.Size = 12
+ActiveChart.Axes(xlValue, xlSecondary).AxisTitle.Characters.Font.Size = 14
+
+ActiveSheet.ChartObjects("グラフ 2").Chart.PlotArea.Select
+With Selection
+    .Height = 180
+    .Width = 340
+    .Top = 45
+    .Left = 34
+End With
+
+ActiveChart.Axes(xlValue).AxisTitle.Select
+    Selection.Top = 43
+
+'------------------------------------------------------------データ比較
+ 
+ Dim chtObj3 As ChartObject
+    Set chtObj3 = Sheets(sheetname).ChartObjects.Add(0, 0, 600, 300)
+    
+    'get refernce to chart object
+    Dim cht3 As Chart
+    Set cht3 = chtObj2.Chart
+    
+    
+ With ActiveSheet.ChartObjects("グラフ 3")
+        .Name = "Chart3"
+        .Top = Range("L35").Top
+        .Left = Range("L35").Left
+        .Height = 250
+        .Width = 400 '大きさを設定
+    
+    With .Chart.ChartArea.Format.TextFrame2.TextRange.Font  'フォント変更
+        .NameComplexScript = "Times New Roman"
+        .NameFarEast = "Times New Roman"
+        .Name = "Times New Roman"
+        .Bold = msoFalse
+    End With
+        
+        With .Chart
+        
+        .HasTitle = True 'タイトル設定
+        .ChartTitle.Text = "比較" 'タイトル文字列
+        
+        .HasLegend = False '凡例表示
+        '.Legend.Position = xlLegendPositionRight '凡例表示位置(右側)
+        
+        End With
+        
+    End With
+    
+    ActiveSheet.ChartObjects("Chart3").Select
+
+'    新しくデータ系列を作成します
+    ActiveChart.SeriesCollection.NewSeries
+
+'    作成したデータ系列に対して､
+'    グラフの種類・X軸の項目・データの範囲・凡例を指定します
+     With ActiveChart.SeriesCollection(1)       'グラフの種類を設定
+        .ChartType = xlXYScatterSmoothNoMarkers       'X軸の項目軸を指定
+        .XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4)) 'データの指定
+        .Values = Range(Sheets(sheetname).Cells(10, 5), Sheets(sheetname).Cells(enddatarow, 5))  '凡例の指定
+        
+        .Name = "Indoor1 PLR"
+ 
+    End With
+    
+'---------------------------------------------------------------------------------------------------データ追加
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(2).Name = "=""Indoor2 PLR"""
+    ActiveChart.FullSeriesCollection(2).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(2).Values = Range(Sheets(sheetname).Cells(10, 12), Sheets(sheetname).Cells(enddatarow, 12))
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(3).Name = "=""Compressor speed"""
+    ActiveChart.FullSeriesCollection(3).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(3).Values = Range(Sheets(sheetname).Cells(10, 6), Sheets(sheetname).Cells(enddatarow, 6))
+    
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(4).Name = "=""Indoor1 suction temperature"""
+    ActiveChart.FullSeriesCollection(4).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(4).Values = Range(Sheets(sheetname).Cells(10, 7), Sheets(sheetname).Cells(enddatarow, 7))
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(5).Name = "=""Indoor1 browout temperature"""
+    ActiveChart.FullSeriesCollection(5).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(5).Values = Range(Sheets(sheetname).Cells(10, 9), Sheets(sheetname).Cells(enddatarow, 9))
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(6).Name = "=""Indoor2 suction temperature"""
+    ActiveChart.FullSeriesCollection(6).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(6).Values = Range(Sheets(sheetname).Cells(10, 13), Sheets(sheetname).Cells(enddatarow, 13))
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(7).Name = "=""Indoor2 browout temperature"""
+    ActiveChart.FullSeriesCollection(7).XValues = Range(Sheets(sheetname).Cells(10, 4), Sheets(sheetname).Cells(enddatarow, 4))
+    ActiveChart.FullSeriesCollection(7).Values = Range(Sheets(sheetname).Cells(10, 15), Sheets(sheetname).Cells(enddatarow, 15))
+
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(8).Name = "=""start"""
+    ActiveChart.FullSeriesCollection(8).XValues = Range(Sheets(sheetname).Cells(1, 26), Sheets(sheetname).Cells(2, 26))
+    ActiveChart.FullSeriesCollection(8).Values = Range(Sheets(sheetname).Cells(1, 20), Sheets(sheetname).Cells(2, 20))
+    
+ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.FullSeriesCollection(9).Name = "=""end"""
+    ActiveChart.FullSeriesCollection(9).XValues = Range(Sheets(sheetname).Cells(1, 28), Sheets(sheetname).Cells(2, 28))
+    ActiveChart.FullSeriesCollection(9).Values = Range(Sheets(sheetname).Cells(1, 20), Sheets(sheetname).Cells(2, 20))
+    
+    '------------------------------------------------------------------------------------------------------軸分け
+
+    ActiveChart.ChartArea.Select
+    
+    ActiveChart.FullSeriesCollection(1).Select
+    
+    ActiveChart.FullSeriesCollection(3).Select
+    
+    ActiveSheet.ChartObjects("Chart3").Activate
+    ActiveChart.FullSeriesCollection(4).Select
+    ActiveChart.FullSeriesCollection(4).AxisGroup = 2
+    
+    ActiveSheet.ChartObjects("Chart3").Activate
+    ActiveChart.FullSeriesCollection(4).Select
+    ActiveChart.FullSeriesCollection(7).Select
+    ActiveChart.FullSeriesCollection(7).AxisGroup = 2
+    ActiveChart.FullSeriesCollection(6).Select
+    ActiveChart.FullSeriesCollection(6).AxisGroup = 2
+    ActiveSheet.ChartObjects("Chart3").Activate
+    ActiveChart.FullSeriesCollection(6).Select
+    ActiveChart.FullSeriesCollection(5).Select
+    ActiveChart.FullSeriesCollection(5).AxisGroup = 2
+    ActiveSheet.ChartObjects("Chart3").Activate
+    ActiveChart.FullSeriesCollection(5).Select
+    Application.CommandBars("Format Object").Visible = False
+    
+     '------------------------------------------------------------------------------------------------------横軸(h)'
+
+    ActiveSheet.ChartObjects("Chart3").Activate
+    ActiveChart.Axes(xlCategory).Select
+    Selection.TickLabels.NumberFormatLocal = "G/標準"
+    
+    
+ 
+     '------------------------------------------------------------------------------------------------------枠色変更
+
+    ActiveSheet.ChartObjects("Chart3").Activate
+    ActiveChart.PlotArea.Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorText1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0
+        .Transparency = 0
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .Weight = 1.5
+    End With
+    
+    ActiveSheet.Shapes("Chart3").Line.Visible = msoFalse
+    ActiveChart.Axes(xlValue).MajorGridlines.Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorText1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0
+        .Transparency = 0
+    End With
+    
+     ActiveSheet.ChartObjects("Chart3").Activate
+        ActiveChart.PlotArea.Select
+    Selection.Width = 500
+    Selection.Left = 57.5
+    
+    
+    
+    ActiveChart.FullSeriesCollection(8).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorBackground1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = -0.5
+        .Transparency = 0
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    
+    ActiveChart.FullSeriesCollection(9).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorBackground1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = -0.5
+        .Transparency = 0
+    End With
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .DashStyle = msoLineDash
+    End With
+    
+    
+    
+
+
+
+    ActiveSheet.ChartObjects("Chart3").Activate
+    ActiveChart.FullSeriesCollection(1).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorText1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(2).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorText1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0
+        .Transparency = 0
+        .DashStyle = msoLineSysDash
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(3).Select
+    With Selection.Format.Line
+        .ForeColor.RGB = RGB(0, 176, 80)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(4).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(255, 0, 0)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(5).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(255, 192, 0)
+        .Transparency = 0
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(6).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(255, 0, 0)
+        .Transparency = 0
+        .DashStyle = msoLineSysDash
+        .Weight = 2.25
+    End With
+    
+    ActiveChart.FullSeriesCollection(7).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(255, 192, 0)
+        .Transparency = 0
+        .DashStyle = msoLineSysDash
+        .Weight = 2.25
+    End With
+
+'-----------------------------------------------------------軸タイトル
+
+' グラフのX軸(横軸)のタイトルを設定
+ActiveChart.Axes(xlCategory, xlPrimary).HasTitle = True
+ActiveChart.Axes(xlCategory, xlPrimary).AxisTitle.Characters.Text = "Time hour"
+ActiveChart.Axes(xlCategory, xlPrimary).AxisTitle.Select
+Selection.Format.TextFrame2.TextRange.Characters(6, 4).Font.Bold = msoTrue
+
+
+' グラフのY軸(縦軸)のタイトルを設定
+ActiveChart.Axes(xlValue, xlPrimary).HasTitle = True
+ActiveChart.Axes(xlValue, xlPrimary).AxisTitle.Characters.Text = "PLR % / Compressor speed Hz / " & Chr(13) & "Air flow rate m3/min"
+ActiveChart.Axes(xlValue, xlPrimary).AxisTitle.Select
+With Selection.Format.TextFrame2.TextRange
+    .Characters(5, 1).Font.Bold = msoTrue
+    .Characters(26, 2).Font.Bold = msoTrue
+    .Characters(46, 6).Font.Bold = msoTrue
+    .Characters(47, 1).Font.BaselineOffset = 0.3
+End With
+
+' グラフのY軸(縦軸)のタイトルを設定
+ActiveChart.Axes(xlValue, xlSecondary).HasTitle = True
+ActiveChart.Axes(xlValue, xlSecondary).AxisTitle.Characters.Text = "Temperature ℃"
+ActiveChart.Axes(xlValue, xlSecondary).AxisTitle.Select
+Selection.Format.TextFrame2.TextRange.Characters(13, 1).Font.Bold = msoTrue
+
+'-----------------------------------------------------------グラフレイアウト変更
+
+ActiveSheet.ChartObjects("Chart3").Activate
+ActiveChart.Axes(xlCategory).Select
+Selection.TickLabelPosition = xlLow
+
+ActiveChart.Axes(xlCategory, xlPrimary).TickLabels.Font.Size = 12
+ActiveChart.Axes(xlCategory, xlPrimary).AxisTitle.Characters.Font.Size = 14
+
+ActiveChart.Axes(xlValue, xlPrimary).TickLabels.Font.Size = 12
+ActiveChart.Axes(xlValue, xlPrimary).AxisTitle.Characters.Font.Size = 14
+
+ActiveChart.Axes(xlValue, xlSecondary).TickLabels.Font.Size = 12
+ActiveChart.Axes(xlValue, xlSecondary).AxisTitle.Characters.Font.Size = 14
+
+ActiveSheet.ChartObjects("Chart3").Chart.PlotArea.Select
+With Selection
+    .Height = 180
+    .Width = 340
+    .Top = 45
+    .Left = 34
+End With
+
+ActiveChart.Axes(xlValue).AxisTitle.Select
+    Selection.Top = 43
+
+
+
+End Sub
